@@ -1,0 +1,45 @@
+items:
+  - model: device_role
+    state: present
+    data:
+      name: Appliance
+      description:
+      slug: appliance
+      color: 9e9e9e
+      vm_role: false
+
+  - model: device_role
+    state: present
+    data:
+      name: Default
+      description:
+      slug: default
+      color: 4caf50
+      vm_role: false
+
+  - model: device_role
+    state: present
+    data:
+      name: Firewall
+      description:
+      slug: firewall
+      color: f44336
+      vm_role: false
+
+  - model: device_role
+    state: present
+    data:
+      name: Modem
+      description:
+      slug: modem
+      color: 14ffff
+      vm_role: false
+
+  - model: device_role
+    state: present
+    data:
+      name: Placeholder
+      description:
+      slug: placeholder
+      color: 5555ff
+      vm_role: false

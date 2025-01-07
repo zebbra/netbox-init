@@ -1,0 +1,15 @@
+version: '3'
+
+tasks:
+  clean:
+    cmds:
+      - docker compose rm -fsv
+      - rm -vrf .docker/postgres/data/*
+
+  ansible:
+    cmds:
+      - |-
+        docker compose exec \
+        ansible \
+        /bin/bash
+

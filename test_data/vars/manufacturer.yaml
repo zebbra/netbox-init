@@ -1,0 +1,24 @@
+items:
+  - model: manufacturer
+    state: present
+    data:
+      name: Cisco
+      slug: cisco
+      description: Cisco
+      custom_fields: {}
+
+  - model: manufacturer
+    state: present
+    data:
+      name: Placeholder
+      slug: placeholder
+      description: Placeholder Ltd.
+      custom_fields: {}
+
+  - model: manufacturer
+    state: present
+    data:
+      name: Generic
+      slug: generic
+      description: Generic Inc.
+      custom_fields: {}

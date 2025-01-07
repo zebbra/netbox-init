@@ -1,0 +1,116 @@
+x-netbox: &netbox
+  image: quay.io/zebbra/netbox:v4.1.11-plugins
+  depends_on:
+    - postgres
+    - valkey
+    - valkey-cache
+  env_file: ./.docker/netbox/netbox.env
+  user: 'unit:root'
+  volumes:
+    - ./.docker/netbox/configuration/extra.py:/etc/netbox/config/extra.py:z,ro
+    - ./.docker/netbox/media:/opt/netbox/netbox/media:rw
+    - ./.docker/netbox/reports:/opt/netbox/netbox/reports:rw
+    - ./.docker/netbox/scripts:/opt/netbox/netbox/scripts:rw
+
+services:
+  postgres:
+    image: postgres:16
+    user: ${USER_UID}:${USER_GID}
+    volumes:
+      - "./.docker/postgres/data:/var/lib/postgresql/data/pgdata:rw"
+      - "./.docker/postgres/import:/import:rw"
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_PASSWORD: netbox
+      POSTGRES_USER: netbox
+      POSTGRES_DB: netbox
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  valkey:
+    image: docker.io/valkey/valkey:8.0-alpine
+    command:
+      - valkey-server
+      - --appendonly yes
+    healthcheck: &valkey-healthcheck
+      test: '[ $$(valkey-cli ping) = ''PONG'' ]'
+      start_period: 5s
+      timeout: 3s
+      interval: 1s
+      retries: 5
+
+  valkey-cache:
+    image: docker.io/valkey/valkey:8.0-alpine
+    command:
+      - valkey-server
+    healthcheck: *valkey-healthcheck
+
+  netbox:
+    <<: *netbox
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      start_period: 120s
+      timeout: 10s
+      interval: 60s
+      test: "curl -f http://localhost:8080/ || exit 1"
+
+  netbox-worker:
+    <<: *netbox
+    depends_on:
+      netbox:
+        condition: service_healthy
+    command:
+      - /opt/netbox/venv/bin/python
+      - /opt/netbox/netbox/manage.py
+      - rqworker
+    healthcheck:
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      test: "ps -aux | grep -v grep | grep -q rqworker || exit 1"
+
+  netbox-housekeeping:
+    <<: *netbox
+    depends_on:
+      netbox:
+        condition: service_healthy
+    command:
+      - /opt/netbox/housekeeping.sh
+    healthcheck:
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      test: "ps -aux | grep -v grep | grep -q housekeeping || exit 1"
+
+  ansible:
+    build: .
+    depends_on:
+      netbox:
+        condition: service_healthy
+    command:
+      - sleep
+      - inf
+    network_mode: host
+    environment:
+      NETBOX_URL: ${NETBOX_URL}
+      NETBOX_TOKEN: ${NETBOX_TOKEN}
+    volumes:
+      - "./test_data/device_types:/srv/init/device_types"
+      - "./test_data/vars:/srv/init/vars"
+      - "./test_data/gen:/srv/init/gen"
+
+  ansible-init:
+    profiles: ["init"]
+    build: .
+    depends_on:
+      netbox:
+        condition: service_healthy
+    network_mode: host
+    environment:
+      NETBOX_URL: ${NETBOX_URL}
+      NETBOX_TOKEN: ${NETBOX_TOKEN}
+    volumes:
+      - "./test_data/device_types:/srv/init/device_types"
+      - "./test_data/vars:/srv/init/vars"
+
