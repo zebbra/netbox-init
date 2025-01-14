@@ -58,7 +58,7 @@ def process_device_type_files(directory):
                         'data': port
                     })
             
-            # Process interfaces - include all supported attributes
+            # Process interfaces
             if 'interfaces' in data:
                 for interface in data['interfaces']:
                     interface['device_type'] = data['slug']
@@ -69,7 +69,7 @@ def process_device_type_files(directory):
                         'data': interface
                     })
             
-            # Process power ports - include all supported attributes
+            # Process power ports
             if 'power-ports' in data:
                 for port in data['power-ports']:
                     port['device_type'] = data['slug']
@@ -81,6 +81,8 @@ def process_device_type_files(directory):
                     })
                     
             # Process module bays
+            # TODO: module_bay_template is currently not suppored by ansible netbox module, fork? find workaround?
+            #       https://github.com/netbox-community/ansible_modules/issues/1340
             if 'module-bays' in data:
                 for bay in data['module-bays']:
                     bay['device_type'] = data['slug']
