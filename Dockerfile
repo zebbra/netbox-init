@@ -39,4 +39,4 @@ WORKDIR ${HOME}
 
 ENV NETBOX_URL=""
 ENV NETBOX_TOKEN=""
-CMD ["${HOME}/generator/init.sh"]
+CMD ["/home/generator/init.sh"]
