@@ -50,78 +50,45 @@ def process_device_type_files(directory):
             # Process console ports
             if 'console-ports' in data:
                 for port in data['console-ports']:
-                    console_port_data = {
-                        'device_type': data['slug'],
-                        'name': port['name'],
-                        'type': port['type']
-                    }
-                    
+                    port['device_type'] = data['slug']
+
                     items.append({
                         'model': 'console_port_template',
                         'state': 'present',
-                        'data': console_port_data
+                        'data': port
                     })
             
             # Process interfaces - include all supported attributes
             if 'interfaces' in data:
                 for interface in data['interfaces']:
-                    interface_data = {
-                        'device_type': data['slug'],
-                        'name': interface['name'],
-                        'type': interface['type']
-                    }
-                    
-                    # Include optional attributes if they exist
-                    if 'mgmt_only' in interface:
-                        interface_data['mgmt_only'] = interface['mgmt_only']
-                    if 'poe_mode' in interface:
-                        interface_data['poe_mode'] = interface['poe_mode']
-                    if 'poe_type' in interface:
-                        interface_data['poe_type'] = interface['poe_type']
-                    
+                    interface['device_type'] = data['slug']
+
                     items.append({
                         'model': 'device_interface_template',
                         'state': 'present',
-                        'data': interface_data
+                        'data': interface
                     })
             
             # Process power ports - include all supported attributes
             if 'power-ports' in data:
                 for port in data['power-ports']:
-                    power_port_data = {
-                        'device_type': data['slug'],
-                        'name': port['name'],
-                        'type': port['type']
-                    }
-                    
-                    # Include optional attributes if they exist
-                    if 'allocated_draw' in port:
-                        power_port_data['allocated_draw'] = port['allocated_draw']
-                    if 'maximum_draw' in port:
-                        power_port_data['maximum_draw'] = port['maximum_draw']
-                    
+                    port['device_type'] = data['slug']
+
                     items.append({
                         'model': 'power_port_template',
                         'state': 'present',
-                        'data': power_port_data
+                        'data': port
                     })
                     
             # Process module bays
             if 'module-bays' in data:
                 for bay in data['module-bays']:
-                    module_bay_data = {
-                        'device_type': data['slug'],
-                        'name': bay['name']
-                    }
-                    
-                    # Include position if it exists
-                    if 'position' in bay:
-                        module_bay_data['position'] = bay['position']
-                    
+                    bay['device_type'] = data['slug']
+
                     items.append({
                         'model': 'module_bay_template',
                         'state': 'present',
-                        'data': module_bay_data
+                        'data': bay
                     })
     
     return items
