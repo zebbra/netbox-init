@@ -24,6 +24,22 @@ def process_var_files(directory):
 
 def process_device_type_files(directory):
     """Process device type files and prepare them for Ansible."""
+    components = {
+        'console-ports': 'console_port_template',
+        'console-server-ports': 'console_server_port_template',
+        'power-ports': 'power_port_template',
+        'power-outlets': 'power_outlet_template',
+        'interfaces': 'device_interface_template',
+        'front-ports': 'front_port_template',
+        'rear-ports': 'rear_port_template',
+        # TODO: module_bay_template is currently not supported by ansible netbox module
+        #       https://github.com/netbox-community/ansible_modules/issues/1340
+        'module-bays': '',
+        'device-bays': 'device_bay_template',
+        # TODO: there is no inventory_item_template in ansible
+        'inventory-items': '',
+    }
+
     items = []
     
     if not directory:
@@ -32,67 +48,30 @@ def process_device_type_files(directory):
     for file_path in Path(directory).glob('*.yaml'):
         with open(file_path, 'r') as f:
             data = yaml.safe_load(f)
-            
+
             # Create a copy of data and remove the components we'll process separately
             device_type_data = data.copy()
-            device_type_data.pop('console-ports', None)
-            device_type_data.pop('interfaces', None)
-            device_type_data.pop('power-ports', None)
-            device_type_data.pop('module-bays', None)
-            
+
+            for component, module in components.items():
+                device_type_data.pop(component, None)
+
+                if module != "" and component in data:
+                    for item in data[component]:
+                        item['device_type'] = data['slug']
+
+                        items.append({
+                            'model': module,
+                            'state': 'present',
+                            'data': item
+                        })
+
             # Add device type with all remaining attributes
             items.append({
                 'model': 'device_type',
                 'state': 'present',
                 'data': device_type_data
             })
-            
-            # Process console ports
-            if 'console-ports' in data:
-                for port in data['console-ports']:
-                    port['device_type'] = data['slug']
 
-                    items.append({
-                        'model': 'console_port_template',
-                        'state': 'present',
-                        'data': port
-                    })
-            
-            # Process interfaces
-            if 'interfaces' in data:
-                for interface in data['interfaces']:
-                    interface['device_type'] = data['slug']
-
-                    items.append({
-                        'model': 'device_interface_template',
-                        'state': 'present',
-                        'data': interface
-                    })
-            
-            # Process power ports
-            if 'power-ports' in data:
-                for port in data['power-ports']:
-                    port['device_type'] = data['slug']
-
-                    items.append({
-                        'model': 'power_port_template',
-                        'state': 'present',
-                        'data': port
-                    })
-                    
-            # Process module bays
-            # TODO: module_bay_template is currently not suppored by ansible netbox module, fork? find workaround?
-            #       https://github.com/netbox-community/ansible_modules/issues/1340
-            if 'module-bays' in data:
-                for bay in data['module-bays']:
-                    bay['device_type'] = data['slug']
-
-                    items.append({
-                        'model': 'module_bay_template',
-                        'state': 'present',
-                        'data': bay
-                    })
-    
     return items
 
 def main():
