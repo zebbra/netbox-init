@@ -133,15 +133,15 @@
     - model: console_port_template
       state: present
       data:
-        device_type: cisco-catalyst-c4510r-plus-e
         name: con0
         type: rj-45
+        device_type: cisco-catalyst-c4510r-plus-e
     - model: console_port_template
       state: present
       data:
-        device_type: cisco-ws-c4506-e
         name: con0
         type: rj-45
+        device_type: cisco-ws-c4506-e
     ignore_errors: true
     tags:
     - console_port_template
@@ -156,17 +156,17 @@
     - model: device_interface_template
       state: present
       data:
-        device_type: cisco-catalyst-c4510r-plus-e
         name: FastEthernet1
         type: 100base-tx
         mgmt_only: true
+        device_type: cisco-catalyst-c4510r-plus-e
     - model: device_interface_template
       state: present
       data:
-        device_type: cisco-ws-c4506-e
         name: FastEthernet1
         type: 100base-tx
         mgmt_only: true
+        device_type: cisco-ws-c4506-e
     ignore_errors: true
     tags:
     - device_interface_template
