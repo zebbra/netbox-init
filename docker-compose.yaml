@@ -96,6 +96,7 @@ services:
       NETBOX_URL: ${NETBOX_URL}
       NETBOX_TOKEN: ${NETBOX_TOKEN}
     volumes:
+      - "./init/generator:/home/generator"
       - "./test_data/device_types:/srv/init/device_types"
       - "./test_data/vars:/srv/init/vars"
       - "./test_data/gen:/srv/init/gen"
